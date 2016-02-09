@@ -2,32 +2,26 @@
 
 var express = require('express');
 var routes = require('./app/routes/index.js');
-var mongoose = require('mongoose');
-var passport = require('passport');
-var session = require('express-session');
+var shortener = require('./app/routes/shortener.js');
+var mongo = require('mongodb').MongoClient;
+
 
 var app = express();
-require('dotenv').load();
-require('./app/config/passport')(passport);
+    require('dotenv').load();
+    mongo.connect('mongodb://localhost:27017/clementinejs', function (err, db) {
 
-mongoose.connect(process.env.MONGO_URI);
-
-app.use('/controllers', express.static(process.cwd() + '/app/controllers'));
-app.use('/public', express.static(process.cwd() + '/public'));
-app.use('/common', express.static(process.cwd() + '/app/common'));
-
-app.use(session({
-	secret: 'secretClementine',
-	resave: false,
-	saveUninitialized: true
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-routes(app, passport);
-
-var port = process.env.PORT || 8080;
-app.listen(port,  function () {
+    if (err) {
+        throw new Error('Database failed to connect!');
+    } else {
+        console.log('MongoDB successfully connected on port 27017.');
+    }
+    
+    
+    routes(app);
+    shortener(app,db);
+    var port = process.env.PORT || 8080;
+    app.listen(port,  function () {
 	console.log('Node.js listening on port ' + port + '...');
+});
+
 });
