@@ -1,32 +1,44 @@
 'use strict';
 
 function urlHandler (db, passedURL) {
+   var alphanum = "ABCDEFGHIJKLMNOPQRSTUVXYZ1234567890";
    var urlDB = db.collection('urls');
+   function getCount(done){
+      urlDB.find().count(function (e, count) {
+          done(count);
+       });
+   }
+
    this.getURLs = function (req, res) {
 
   var urlProjection = { '_id': false };
 
-   urlDB.findOne({}, urlProjection, function (err, result) {
+   urlDB.findOne({'url': passedURL}, urlProjection, function (err, result) {
      if (err) {
         throw err;
      }
 
      if (result) {
-        res.json(result);
+       return(result);
      } else {
-        urlDB.insert({ 'url': passedURL  }, function (err) {
-           if (err) {
-              throw err;
-           }
+      getCount(function(count){
+         
+         
 
-           urlDB.findOne({}, urlProjection, function (err, doc) {
-              if (err) {
-                 throw err;
-              }
-            console.log(doc + "this is a line of logging you added");
-              res.json(doc);
+          urlDB.insert({ 'url': passedURL, 'new-url': count  }, function (err) {
+            if (err) {
+                throw err;
+            }
+   
+             urlDB.findOne({}, urlProjection, function (err, doc) {
+               if (err) {
+                   throw err;
+                 }
+               return(doc);
            });
         });
+        
+     })
      }
   });
 };
