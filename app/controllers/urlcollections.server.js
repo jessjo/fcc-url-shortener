@@ -22,10 +22,12 @@ function urlHandler (db, passedURL) {
        return(result);
      } else {
       getCount(function(count){
+         //var cur = count/alphanum.length;
+        // console.log(cur);
+         var urlString = "https://url-shortener-jessjo.c9users.io/"+count;
+   
          
-         
-
-          urlDB.insert({ 'url': passedURL, 'new-url': count  }, function (err) {
+          urlDB.insert({ 'url': passedURL, 'new-url': urlString  }, function (err) {
             if (err) {
                 throw err;
             }

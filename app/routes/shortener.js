@@ -9,9 +9,28 @@ app.route('/:url')
   .get(function (req, res) {
     var newUrl = req.params.url;
      var urlHandler = new UrlHandler(db, newUrl);
-     urlHandler.getURLs();
-      var urlDB = db.collection('urls');
-      var urlProjection =  { '_id': false };
+     
+       var urlDB = db.collection('urls');
+        var urlProjection =  { '_id': false };
+      
+    //verify if URL exists and direct to page. Otherwise, get URL
+     
+      urlDB.findOne({'url': newUrl}, urlProjection, function (err, result) {
+       if (err) {
+         throw err;
+      }
+  
+      if (result) {
+       
+        res.send(result);
+       }else {
+ 
+    
+
+  
+  //creates a new URL is one doesn't exist
+       urlHandler.getURLs();
+    //finds URL to post on page
        urlDB.findOne({'url': newUrl}, urlProjection, function (err, result) {
        if (err) {
          throw err;
@@ -22,7 +41,9 @@ app.route('/:url')
         res.send(result);
        }
        })
-   // res.send("success");
+       
+       } 
+       })
 });
 
 };
