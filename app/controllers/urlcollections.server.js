@@ -1,6 +1,6 @@
 'use strict';
 
-function urlHandler (db, passedURL) {
+function urlHandler (db, passedURL, res1) {
    var alphanum = "ABCDEFGHIJKLMNOPQRSTUVXYZ1234567890";
    var urlDB = db.collection('urls');
    function getCount(done){
@@ -9,40 +9,43 @@ function urlHandler (db, passedURL) {
        });
    }
 
-   this.getURLs = function (req, res) {
+this.getURLs = function (req, res) {
 
-  var urlProjection = { '_id': false };
-
-   urlDB.findOne({'url': passedURL}, urlProjection, function (err, result) {
-     if (err) {
-        throw err;
-     }
-
-     if (result) {
-       return(result);
-     } else {
-      getCount(function(count){
-         //var cur = count/alphanum.length;
-        // console.log(cur);
-         var urlString = "https://url-shortener-jessjo.c9users.io/"+count;
-   
+      var urlDB = db.collection('urls');
+      var urlProjection =  { '_id': false };
+       urlDB.findOne({'url': passedURL}, urlProjection, function (err, result) {
+       if (err) {
+         throw err;
+      }
+  
+      if (result) {
+          console.log("I found result");
+      } else {
+      getCount(function(count,res){
          
-          urlDB.insert({ 'url': passedURL, 'new-url': urlString  }, function (err) {
+         var urlVal ="https://url-shortener-jessjo.c9users.io/"+ count;
+           urlDB.findOne({'new-url': urlVal}, urlProjection, function (err, result) {
+             if (err) {
+                throw err;
+             }
+  
+             if (result) {
+                 urlVal += "a";
+             }
+           });
+          urlDB.insert({ 'url': passedURL, 'new-url':  urlVal }, function (err) {
             if (err) {
                 throw err;
             }
-   
-             urlDB.findOne({}, urlProjection, function (err, doc) {
-               if (err) {
-                   throw err;
-                 }
-               return(doc);
-           });
+           res1.send ({ 'url': passedURL, 'new-url':  urlVal });
+          
         });
         
      })
-     }
-  });
+          
+       }
+       })
+     
 };
    
 }
